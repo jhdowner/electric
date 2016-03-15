@@ -1,2 +1,2 @@
 # electric
-to imbed in squarespace
+to embed in squarespace

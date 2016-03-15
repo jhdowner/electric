@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+
+.chart tangle {
+  fill: steelblue;
+}
+
+.chart text {
+  fill: red;
+  font: 10px sans-serif;
+  text-anchor: end;
+}
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+.municipalities {
+  fill: black;
+}
+
+#municipalities .active {
+  fill: black;
+}
+
+.state-boundary {
+  fill: none;
+  stroke: #6E6E6E;
+  pointer-events: none;
+}
+
+.municipality-boundary {
+  fill: none;
+  stroke: #323333;
+  stroke-opacity: .25;
+  stroke-width: 2px;
+  pointer-events: none;
+}
+
+</style>
+<body
+  style = "background: #FFFFFF;">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script>
+
+var color_map = ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"]
+
+var department = {
+  "Terrabona": { offgrid: 54, pop: 12740, area: 0.02488147, active: false},
+  "Sébaco": { offgrid: 14.9, pop: 32221, area: 0.02312906, active: false},
+  "San Ramón": { offgrid: 65.2, pop: 5516, area: 0.04603549, active: false},
+  "San Isidro": { offgrid: 24.4, pop: 17412, area: 0.01051557, active: false},
+  "San Dionisio": { offgrid: 65.1, pop: 16273, area: 0.0135968, active: false},
+  "Río Blanco": { offgrid: 63, pop: 27989, area: 0.22493787, active: false},
+  "Rancho Grande": { offgrid: 88.1, pop: 3640, area: 0.5442377, active: false},
+  "Muy Muy": {offgrid: 65.4, pop: 14721, area: 0.04830491, active: false},
+  "Matiguás": { offgrid: 68.7, pop: 41127, area: 0.12359269, active: false},
+  "Matagalpa": { offgrid: 26.2, pop: 133416, area: 0.0501782, active: false},
+  "Esquipulas": { offgrid: 41.9, pop: 15877, area: 0.01515406, active: false},
+  "Tuma-La Dalia": { offgrid: 70.9, pop: 56681, area: 0.035394, active: false},
+  "Ciudad Darío": { offgrid: 50.5, pop: 41014, area: 0.0764029, active: false},
+  "Bonanza": { offgrid: 57, pop: 18633, area: 0.149518932, active: false},
+  "Mulukukú": {offgrid: 82.5, pop: 29838, active: false},
+  "Prinzapolka": {offgrid: 91.3, pop: 16105, area: 0.535901167, active: false},
+  "Puerto Cabezas": {offgrid: 39.8, pop: 66169, area: 0.439885650, active: false},
+  "Rosita": {offgrid: 70.9, pop: 22723, area: 0.389548156, active: false},
+  "Siuna": {offgrid: 75.5, pop: 64092, area: 0.389652456, active: false},
+  "Waspán": {offgrid: 87.9, pop: 47051, area: 0.651949443, active: false},
+  "Waslala": {offgrid: 87.2, pop: 49339, area: 0.122033424, active: false},
+  "Bluefields": {offgrid: 17.7, pop: 45547, area: 0.390937908, active: false},
+  "Corn Island": {offgrid: 12.5, pop: 6626, active: false},
+  "Río Grande": {offgrid: 94.6, pop: 3585, active: false},
+  "El Ayote": {offgrid: 95.4, pop: 12517, active: false},
+  "El Tortuguero": {offgrid: 89.2, pop: 22324, active: false},
+  "Kukra Hill": {offgrid: 63, pop: 8789, area: 0.09768891246, active: false},
+  "La Cruz de Río Grande": {offgrid: 96.4, pop: 23285, area: 0.51403229612, active: false}, // 23285/.51x: 23285/3449
+  "Laguna de Perlas": {offgrid: 57.3, pop: 10676, area: 0.31751128930, active: false},
+  "Muelle de los Bueyes": {offgrid: 60.4, pop: 22082, area: 0.10156061402, active: false},
+  "Nueva Guinea": {offgrid: 61.4, pop: 66936, area: 0.22844790220, active: false},
+  "Bocana de Paiwas": {offgrid: 91.7, pop: 31762, area: 0.10088860846, active: false},
+  "El Rama": {offgrid: 70.2, pop: 52482, area: 0.40655388722, active: false},
+  "Boaco": {offgrid: 50.8, pop: 49839, area: 0.08284722706, active: false},
+  "Camoapa": {offgrid: 22.2, pop: 34962, area: 0.12139563424, active: false},
+  "San Lorenzo": {offgrid: 45.2, pop: 23666, area: 0.053299217, active: false},
+  "San José de los Remates": {offgrid: 62.9, pop: 7650, area: 0.02410909252, active: false},
+  "Santa Lucía": {offgrid: 61.5, pop: 8253, area: 0.00860838122, active: false},
+  "Teustepe": {offgrid: 55.3, pop: 26265, area: 0.05717649466, active: false},
+  "Diriamba": {offgrid: 11, pop: 57542, area: 0.04923286541, active: false},
+  "Dolores": {offgrid: 3.32, pop: 6761, area: 0.00365603530, active: false},
+  "El Rosario": {offgrid: 6.2, pop: 5317, area: 0.00165251812, active: false},
+  "Jinotepe": {offgrid: 14.4, pop: 42109, area: 0.01692693630, active: false},
+  "La Conquista": {offgrid: 64.1, pop: 3777, area: 0.00696112808, active: false},
+  "La Paz de Carazo": {offgrid: 10.5, pop: 4657, area: 0.00139908555, active: false},
+  "San Marcos": {offgrid: 9.6, pop: 29019, area: 0.00768234247, active: false},
+  "Santa Teresa": {offgrid: 35.3, pop: 16891, active: false},
+  "Chichigalpa": {offgrid: 7.7, pop: 44769, area: 0.0159603, active: false},
+  "Chinandega": {offgrid: 10.3, pop: 121793, area: 0.06410873, active: false},
+  "Cinco Pinos": {offgrid: 35.6, pop: 6781, area: 0.006788777, active: false},
+  "Corinto": {offgrid: 5.9, pop: 16624, area: 0.00361366, active: false},
+  "El Realejo": {offgrid: 17.0, pop: 8838, area: 0.00963435, active: false},
+  "El Viejo": {offgrid: 34.8, pop: 66156, area: 0.1112327, active: false},
+  "Posoltega": {offgrid: 15.8, pop: 16771, area: 0.00793914, active: false},
+  "Puerto Morazán": {offgrid: 27.8, pop: 13328, area: 0.01805026, active: false},
+  "San Francisco del Norte": {offgrid: 46.2, pop: 6758, area: 0.0099199, active: false},
+  "San Pedro del Norte": {offgrid: 34.8, pop: 4719, area: 0.009963899, active: false},
+  "Somotillo": {offgrid: 39.9, pop: 29030, area: 0.0708093, active: false},
+  "Villanueva": {offgrid: 48.6, pop: 2566, area: 0.069795, active: false},
+  "Acoyapa": {offgrid: 50.6, pop: 16946, area: 0.099294889, active: false},
+  "Comalapa": {offgrid: 65.6, pop: 11785, area: 0.0462262, active: false},
+  "El Coral": {offgrid: 53.2, pop: 7039, active: false},
+  "Juigalpa": {offgrid: 16.7, pop: 51838, area: 0.088068115, active: false},
+  "La Libertad": {offgrid: 56.7, pop: 11419, area: 0.05314709, active: false},
+  "San Francisco de Cuapa": {offgrid: 49.4, pop: 5507, active: false},
+  "San Pedro de Lóvago": {offgrid: 46.1, pop: 7650, area: 0.0525474, active: false},
+  "Santo Domingo": {offgrid: 60.3, pop: 12182, area: 0.0521758, active: false},
+  "Santo Tomás": {offgrid: 30.4, pop: 16404, area: 0.04697806, active: false},
+  "Villa Sandino": {offgrid: 43.4, pop: 13152, area: 0.0828564, active: false},
+  "Condega": {offgrid: 44.3, pop: 28481, area: 0.033441001, active: false},
+  "Estelí": {offgrid: 16.7, pop: 112184, area: 0.060044615, active: false},
+  "La Trinidad": {offgrid: 30.8, pop: 20140, area: 0.0216277, active: false},
+  "Pueblo Nuevo": {offgrid: 40.2, pop: 20620, area: 0.02027178, active: false},
+  "San Juan de Limay": {offgrid: 61.6, pop: 13463, area: 0.04443543, active: false},
+  "San Nicolás": {offgrid: 80.4, pop: 6768, area: 0.01625253, active: false},
+  "Diriá": {offgrid: 8.5, pop: 6375, area: 0.0019955516, active: false},
+  "Diriomo": {offgrid: 9.1, pop: 22352, area: 0.00362096, active: false},
+  "Granada": {offgrid: 5.9, pop: 105171, area: 0.0436438, active: false},
+  "Nandaime": {offgrid: 20.8, pop: 34288, area: 0.03508166, active: false},
+  "El Cuá": {offgrid: 90.4, pop: 43305, area: 0.4036528, active: false},
+  "Jinotega": {offgrid: 44.1, pop: 99382, area: 0.0789005, active: false},
+  "La Concordia": {offgrid: 45.0, pop: 6486, area: 0.0144318, active: false},
+  "San José de Bocay": {offgrid: 91.2, pop: 42029, active: false},
+  "San Rafael del Norte": {offgrid: 52.8, pop: 17789, area: 0.03320878, active: false},
+  "San Sebastián de Yalí": {offgrid: 69.3, pop: 26979, area: 0.0269045, active: false},
+  "Santa María de Pantasma": {offgrid: 82.4, pop: 37880, area: 0.046412, active: false},
+  "Wiwilí": {offgrid: 92.3, pop: 57485, area: 0.221745, active: false}, // add "Wiwilí de Nueva Segovia": {offgrid: 85.6, pop: 16344}?
+  "Achuapa": {offgrid: 76.0, pop: 13797, area: 0.0263808, active: false},
+  "El Jicaral": {offgrid: 28.6, pop: 10326, area: 0.361965, active: false},
+  "El Sauce": {offgrid: 57.8, pop: 27900, area: 0.0597763, active: false},
+  "La Paz Centro": {offgrid: 16.0, pop: 28118, area: 0.061599, active: false},
+  "Larreynaga-Malpaisillo": {offgrid: 23.1, pop: 27898, area: 0.06356488, active: false},
+  "León": {offgrid: 8.4, pop: 174051, area: 0.066854, active: false},
+  "Nagarote": {offgrid: 13.9, pop: 32303, area: 0.0457013, active: false},
+  "Quezalguaque": {offgrid: 14.9, pop: 8591, area: 0.0072809, active: false},
+  "Santa Rosa del Peñón": {offgrid: 63.3, pop: 9529, area: 0.0161139, active: false},
+  "Telica": {offgrid: 46.1, pop: 46117, area: 0.033098, active: false},
+  "Las Sabanas": {offgrid: 52.9, pop: 4136, area: 0.0062741, active: false},
+  "Palacagüina": {offgrid: 33.6, pop: 12825, area: 0.01374933, active: false},
+  "San José de Cusmapa": {offgrid: 86.1, pop: 7072, area: 0.0056217, active: false},
+  "San Juan del Río Coco": {offgrid: 68.1, pop: 21024, area: 0.01681067, active: false},
+  "San Lucas": {offgrid: 54.5, pop: 12975, area: 0.012754, active: false},
+  "Somoto": {offgrid: 33.2, pop: 33788, area: 0.03902564, active: false},
+  "Telpaneca": {offgrid: 85.8, pop: 19025, area: 0.02338, active: false},
+  "Totogalpa": {offgrid: 83.1, pop: 11927, area: 0.01142099, active: false},
+  "Yalagüina": {offgrid: 45.0, pop: 9597, area: 0.0050399, active: false},
+  "Ciudad Antigua": {offgrid: 77.0, pop: 4868, area: 0.0137259, active: false},
+  "Dipilto": {offgrid: 45.9, pop: 5207, area: 0.007408124, active: false},
+  "Ciudad Sandino": {offgrid: 51.5, pop: 25901, area: 0.03028258, active: false},
+  "Jalapa": {offgrid: 51.3, pop: 54491, area: 0.05064629, active: false},
+  "Macuelizo": {offgrid: 60.0, pop: 6067, area: 0.21010175, active: false},
+  "Mozonte": {offgrid: 65.2, pop: 6795, area: 0.01474794, active: false},
+  "Murra": {offgrid: 87.7, pop: 14874, area: 0.037279966, active: false},
+  "Ocotal": {offgrid: 13.4, pop: 34580, area: 0.011809158, active: false},
+  "Quilalí": {offgrid: 76.5, pop: 26461, area: 0.031994234, active: false},
+  "San Fernando": {offgrid: 47.5, pop: 8549, area: 0.028037986, active: false},
+  "Santa María": {offgrid: 69.0, pop: 4404, area: 0.01399655, active: false},
+  "El Almendro": {offgrid: 68.4, pop: 13363, area: 0.08176093, active: false}, /////
+  "El Castillo": {offgrid: 85.4, pop: 19864, active: false}, ////
+  "Morrito": {offgrid: 74.6, pop: 6570, area: 0.05623356, active: false}, ////
+  "San Carlos": {offgrid: 59.4, pop: 37461, area: 0.2475236, active: false}, ////
+  "San Juan del Norte": {offgrid: 33.2, pop: 1307, area: 0.128858555, active: false}, ////
+  "San Miguelito": {offgrid: 69.5, pop: 1731, area: 0.09246812, active: false}, ////
+  "Altagracia": {offgrid: 32.4, pop: 19955, area: 0.017047923, active: false},
+  "Belén": {offgrid: 14.4, pop: 16428, area: 0.02334027, active: false},
+  "Buenos Aires": {offgrid: 11.4, pop: 5420, area: 0.00607792, active: false},
+  "Cárdenas": {offgrid: 66.5, pop: 6990, active: false},
+  "Moyogalpa": {offgrid: 17.8, pop: 9729, area: 0.005176562, active: false},
+  "Potosí": {offgrid: 5.1, pop: 11904, area: 0.00908627, active: false},
+  "Rivas": {offgrid: 3.9, pop: 41080, area: 0.0132288, active: false},
+  "San Jorge": {offgrid: 5.3, pop: 8024, area: 0.00184437, active: false},
+  "San Juan del Sur": {offgrid: 23.1, pop: 14741, active: false},
+  "Tola": {offgrid: 19.6, pop: 22012, area: 0.08176093, active: false},
+  "Managua": {offgrid: 0.7, pop: 937489, area: 0.04822125, active: false}, 
+  "Mateare": {offgrid: 4.3, pop: 28775, area: 0.02814003, active: false},
+  "San Francisco Libre": {offgrid: 59.2, pop: 9416, area: 0.0536786, active: false},
+  "San Rafael del Sur": {offgrid: 9.5, pop: 42417, area: 0.02922356, active: false},
+  "Ticuantepe": {offgrid: 4.0, pop: 27008, area: 0.00455804, active: false},
+  "Tipitapa": {offgrid: 9.1, pop: 101685, area: 0.08304938, active: false},
+  "Villa Carlos Fonseca": {offgrid: 26.9, pop: 27449, area: 0.04917585, active: false},
+  "Catarina": {offgrid: 4.0, pop: 7524, area: 0.0009619, active: false},
+  "La Concepción": {offgrid: 8.5, pop: 31950, area: 0.00524732, active: false},
+  "Masatepe": {offgrid: 8.3, pop: 31583, area: 0.005948897, active: false},
+  "Masaya": {offgrid: 3.4, pop: 139582, area: 0.015085109, active: false},
+  "Nandasmo": {offgrid: 6.7, pop: 10732, area: 0.001398915, active: false},
+  "Nindirí": {offgrid: 4.1, pop: 38355, area: 0.01013649, active: false},
+  "Niquinohomo": {offgrid: 5.3, pop: 14847, area: 0.00168852, active: false},
+  "San Juan de Oriente": {offgrid: 9.4, pop: 4734, area: 0.00049541, active: false},
+  "Tisma": {offgrid: 7.8, pop: 10681, area: 0.0091645, active: false}
+};
+
+//bugfix for calculating active
+var prev = "Condega";
+
+var width = 1460, // was 1260
+    height = 900, // was 628
+    centered;
+
+var projection = d3.geo.conicConformal()
+    .rotate([102, 0])
+    .center([18.0, 13])
+    .parallels([17.5, 29.5])
+    .scale(10000)
+    .translate([1260 / 2, height / 2]);
+
+var path = d3.geo.path()
+    .projection(projection);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+// Bar chart
+var barHeight = 50;
+// var n_poor = 0;
+// var poor = 0;
+// var v_poor = 100;
+
+
+var x = d3.scale.linear()
+    .domain([0, 25])
+    .range([0, 100]);
+
+var chart = d3.select(".chart")
+    .attr("x", 910)
+    .attr("width", 200)
+    .attr("height", barHeight * 3);
+
+// Bar chart
+
+var rectangle = svg.append("rect")
+  .attr("x", 900)
+  .attr("y", 300)
+  .attr("width", 450)
+  .attr("height", 250)
+  .style("stroke", "#000000")
+  .style("fill", "none")
+  .style("stroke-width", "1px")
+  .attr("font-family", "sans-serif")
+  .attr("font-size", "40px")
+  .attr("fill", "#F0D000");
+  
+var text = svg.selectAll("text")
+    .data("title")
+    .enter()
+    .append("text");
+
+svg.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    .on("click", clicked);
+
+d3.csv("electric.csv", function(error, data){
+  electric = data.map(function(a){
+    return [
+      a["department"],
+      a["municipality"],
+      a["community"],
+      a["population"],
+      a["occupied_hh"],
+      a["average_hh"],
+      a["hh_unelectrified"],
+      a["percent_unelectrified"],
+      a["percent_n_poor"],
+      a["percent_poor"],
+      a["percent_v_poor"]];
+      })
+
+  svg.selectAll("body")
+    .on("click", clicked);
+});
+
+d3.json("nica.json", function(error, nica) {
+  g = svg.append("g")
+    .attr("class", "municipalities")
+    .selectAll("path")
+    .data(function() {
+      var features = topojson.feature(nica, nica.objects.municipalities).features;
+      for (var i = 0; i < nica.objects.municipalities.geometries.length; i++) {
+        features[i].municipality = nica.objects.municipalities.geometries[i].properties.state;
+        features[i].state = nica.objects.municipalities.geometries[i].properties.name;
+        if(features[i].municipality != "Lago de Nicaragua" && features[i].municipality != "Lago de Managua"){
+          features[i].population = department[features[i].municipality].pop;
+          features[i].offgrid = department[features[i].municipality].offgrid;
+        }
+      }
+    return features;
+    })
+    .enter().append("path")
+    .attr("d", path)
+    .on("click", clicked)
+    .style("fill", function(d, i){
+      // if(d.municipality.active == true) {console.log(department[d.municipality]);}
+      if(d.municipality == "Lago de Nicaragua" || d.municipality == "Lago de Managua"){
+        return '#3690c0';
+      }
+      if(department[d.municipality].active == true){return "black";}
+      else if(d.state == "Matagalpa" || d.state == "Atlántico Norte" || d.state == 
+        "Atlántico Sur" || d.state == "Boaco" || d.state == "Carazo" || d.state 
+        == "Chinandega" || d.state == "Chontales" || d.state == "Estelí" ||d.state
+        == "Granada" || d.state == "Jinotega" || d.state == "León" || d.state == 
+        "Madriz" || d.state == "Nueva Segovia" || d.state == "Río San Juan" || 
+        d.state == "Rivas" || d.state == "Managua" || d.state == "Masaya"){
+          
+            // take the offgrid quotent and divide by 10 (minus one) to get the color index [0-9]
+            // return color_map[(Math.floor(department[d.municipality].offgrid / 10.8))];
+
+            // for population, we want a log base which gives the desired split OR a split that reflects the base
+            //console.log(Math.log2(department[d.municipality].pop)-10);
+            //console.log(Math.floor(Math.log2(department[d.municipality].pop))-10);
+            // return color[Math.floor(Math.log2(department[d.municipality].pop))-10];
+
+            // return the number of people per square km with legend?
+            // console.log(d.properties.state);
+            // console.log(department[d.municipality].pop / (department[d.municipality].area * 9001));
+            // if(department[d.municipality].pop / (department[d.municipality].area * 9001) < 25){return color[0]};
+            // if(department[d.municipality].pop / (department[d.municipality].area * 9001) < 100){return color[2]};
+            // if(department[d.municipality].pop / (department[d.municipality].area * 9001) < 250){return color[4]};
+            // if(department[d.municipality].pop / (department[d.municipality].area * 9001) < 1000){return color[6]};
+            // if(department[d.municipality].pop / (department[d.municipality].area * 9001) > 1000){return color[8]};
+
+            //municipality name
+    //        console.log(d.properties.state);
+            //municipality pop density
+    //        console.log(department[d.municipality].pop / (department[d.municipality].area * 9001));
+            // municipality customer density
+      var customer_density = (department[d.municipality].offgrid/100) * 
+      department[d.municipality].pop / (department[d.municipality].area * 9001);
+      // console.log(d.municipality + ','+customer_density);
+      //potential customers per square km
+        if(customer_density < 10){return color_map[0]};
+        if(customer_density < 20){return color_map[1]};
+        if(customer_density < 30){return color_map[2]};
+        if(customer_density < 40){return color_map[3]};
+        if(customer_density < 50){return color_map[4]};
+        if(customer_density < 75){return color_map[5]};
+        if(customer_density > 75){return color_map[6]};
+        // return the density of offgrid customers? For what fucking purpose?
+    }
+      return '#444400';
+    }
+)
+
+svg.append("path")
+  .datum(topojson.mesh(nica, nica.objects.municipalities, function(a, b) { 
+    return a.properties.state !== b.properties.state; }))
+  .attr("class", "municipality-boundary")
+  .attr("d", path);
+});
+
+d3.select(self.frameElement).style("height", height + "px");
+
+function clicked(d) {
+  if(d.municipality == "Lago de Nicaragua" || d.municipality == "Lago de Managua"){return;}
+  department[prev].active = false;
+  prev = d.municipality;
+  department[d.municipality].active = true;
+
+  d3.selectAll('text').remove()
+
+//   var bar = svg.selectAll(".bar")
+//     .data(data(d))
+//   .enter().append("rect")
+//     .attr("class", "bar")
+//     .attr("x", function(d) { return x(d.name); })
+//     .attr("y", function(d) { return y(d.value); })
+//        .attr("height", function(d) { return height - y(d.value); })
+//        .attr("width", x.rangeBand());
+//     // removed data:
+//     bar.exit().remove();
+//     .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+//     bar
+//        .transition()
+//        .duration(750)
+//            .attr("y", function(d) { return y(d.value); })
+//            .attr("height", function(d) { return height - y(d.value); });
+
+// // console.log(d.municipality + ": " + n_poor + " / "+ poor + " / " + v_poor);
+
+//   bar.append("rect")
+//     .attr("x", 910)
+//     .attr("y", 545)
+//     .style("fill", "steelblue")
+//     .transition()
+//       .delay(function(d, i) { return i * 300 })
+//       .duration(300)
+//       .ease("quad")
+//       .attr("width", x)
+//       .attr("height", barHeight-1)
+//       // .attr("transform", function(d,i) {
+//       //       return "translate(" + [x(i), 0] + ")"
+//       //   })
+
+//   bar.append("text")
+//     .attr("x", function(d) { return x(d) + 915; })
+//     .attr("y", 545 + barHeight / 2)
+//     .attr("dy", ".35em")
+//     .text(function(d) { return Math.round(d) + "%"; });
+
+  // svg.append("text")
+  //   .attr("x", 780)
+  //   .attr("y", 595 + barHeight / 2)
+  //   .attr("font-size", "18px")
+  //   .text("Percent Not Poor");
+
+  // svg.append("text")
+  //   .attr("x", 805)
+  //   .attr("y", 645 + barHeight / 2)
+  //   .attr("font-size", "18px")
+  //   .text("Percent Poor");
+
+  // svg.append("text")
+  //   .attr("x", 770)
+  //   .attr("y", 695 + barHeight / 2)
+  //   .attr("font-size", "18px")
+  //   .text("Percent Very Poor");
+
+  svg.append("text")
+    .attr("x", 910)
+    .attr("y", 345)
+    .style("stroke", "#000000")
+    .style("fill", "black")
+    .text(prev)
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "30px")
+    .attr("fill", "#F0D000");
+
+  svg.append("text")
+    .attr("x", 920)
+    .attr("y", 400)
+    .style("stroke", "#000000")
+    .style("fill", "black")
+    .style("stroke-width", "1px")
+    .text("Population: " + d.population)
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "28px")
+    .attr("fill", "#F0D000");
+
+  svg.append("text")
+    .attr("x", 920)
+    .attr("y", 435)
+    .style("stroke", "#000000")
+    .style("fill", "black")
+    .style("stroke-width", "1px")
+    .text("Population offgrid: " + Math.round(d.population*d.offgrid/100))
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "28px")
+    .attr("fill", "#F0D000");
+
+  svg.append("text")
+    .attr("x", 920)
+    .attr("y", 470)
+    .style("stroke", "#000000")
+    .style("fill", "black")
+    .style("stroke-width", "1px")
+    .text("Percent offgrid: " + d.offgrid+ "%")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "28px")
+    .attr("fill", "#F0D000");
+
+  var customer_density = (department[d.municipality].offgrid/100) * 
+      department[d.municipality].pop / (department[d.municipality].area * 9001);
+
+  svg.append("text")
+    .attr("x", 920)
+    .attr("y", 505)
+    .style("stroke", "#000000")
+    .style("fill", "black")
+    .style("stroke-width", "1px")
+    .text(Math.floor(customer_density) + " unelectrified homes per sq. km")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "28px")
+    .attr("fill", "#F0D000");
+
+  svg.selectAll("path")
+    .style("fill", function(d, i){
+      // if(d.municipality.active == true) {console.log(department[d.municipality]);}
+      if(d.municipality == "Lago de Nicaragua" || d.municipality == "Lago de Managua"){
+        return '#3690c0';
+      }
+      if(department[d.municipality].active == true){return "black";}
+      else if(d.state == "Matagalpa" || d.state == "Atlántico Norte" || d.state == 
+        "Atlántico Sur" || d.state == "Boaco" || d.state == "Carazo" || d.state 
+        == "Chinandega" || d.state == "Chontales" || d.state == "Estelí" ||d.state
+        == "Granada" || d.state == "Jinotega" || d.state == "León" || d.state == 
+        "Madriz" || d.state == "Nueva Segovia" || d.state == "Río San Juan" || 
+        d.state == "Rivas" || d.state == "Managua" || d.state == "Masaya"){
+      var customer_density = (department[d.municipality].offgrid/100) * 
+      department[d.municipality].pop / (department[d.municipality].area * 9001);
+      //potential customers per square km
+        if(customer_density < 10){return color_map[0]};
+        if(customer_density < 20){return color_map[1]};
+        if(customer_density < 30){return color_map[2]};
+        if(customer_density < 40){return color_map[3]};
+        if(customer_density < 50){return color_map[4]};
+        if(customer_density < 75){return color_map[5]};
+        if(customer_density > 75){return color_map[6]};
+    }
+      return '#444400';
+    // color[Math.floor((Math.random()*100)%7)].color;
+    })
+
+}
+
+function data(d){
+  for(var i = 0; i < electric.length; i++){
+    if(electric[i][1] == d.municipality){
+      if(electric[i][2] == "Total" || electric[i][2] == "TOTAL"){
+        return [0,electric[i][8], electric[i][9], electric[i][10]];
+
+      }
+    }
+  }
+}
+
+
+</script>

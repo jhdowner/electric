@@ -298,17 +298,6 @@ d3.json("nica.json", function(error, nica) {
       }
     return features;
     })
-    
-  svg.append("text")
-    .attr("x", width-300)
-    .attr("y", height/2 - 80)
-    .style("stroke", "#000000")
-    .style("fill", "black")
-    .text("Click on a municipality to learn more!")
-    .attr("font-family", "sans-serif")
-    .attr("font-size", "20px")
-    .attr("fill", "#F0D000");
-    
     .enter().append("path")
     .attr("d", path)
     .on("click", clicked)
@@ -363,6 +352,16 @@ d3.json("nica.json", function(error, nica) {
       return '#444400';
     }
 )
+
+svg.append("text")
+  .attr("x", width-300)
+  .attr("y", height/2 - 80)
+  .style("stroke", "#000000")
+  .style("fill", "black")
+  .text("Click on a municipality to learn more!")
+  .attr("font-family", "sans-serif")
+  .attr("font-size", "20px")
+  .attr("fill", "#F0D000");
 
 svg.append("path")
   .datum(topojson.mesh(nica, nica.objects.municipalities, function(a, b) { 

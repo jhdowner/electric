@@ -203,7 +203,7 @@ var department = {
 //bugfix for calculating active
 var prev = "Condega";
 
-var width = 1460, // was 1260
+var width = 800, // was 1260
     height = 500, // was 628
     centered;
 
@@ -429,7 +429,7 @@ function clicked(d) {
   //   .text("Percent Very Poor");
 
   svg.append("text")
-    .attr("x", 910)
+    .attr("x", width-80)
     .attr("y", 345)
     .style("stroke", "#000000")
     .style("fill", "black")

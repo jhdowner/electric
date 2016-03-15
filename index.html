@@ -211,7 +211,7 @@ var projection = d3.geo.conicConformal()
     .rotate([102, 0])
     .center([18.0, 13])
     .parallels([17.5, 29.5])
-    .scale(5000)
+    .scale(6000)
     .translate([width / 2, height / 2]);
 
 var path = d3.geo.path()
@@ -439,50 +439,50 @@ function clicked(d) {
     .attr("fill", "#F0D000");
 
   svg.append("text")
-    .attr("x", 920)
-    .attr("y", 400)
+    .attr("x", width-190)
+    .attr("y", height/2-65)
     .style("stroke", "#000000")
     .style("fill", "black")
     .style("stroke-width", "1px")
     .text("Population: " + d.population)
     .attr("font-family", "sans-serif")
-    .attr("font-size", "28px")
+    .attr("font-size", "19px")
     .attr("fill", "#F0D000");
 
   svg.append("text")
-    .attr("x", 920)
-    .attr("y", 435)
+    .attr("x", width-190)
+    .attr("y", height/2-50)
     .style("stroke", "#000000")
     .style("fill", "black")
     .style("stroke-width", "1px")
     .text("Population offgrid: " + Math.round(d.population*d.offgrid/100))
     .attr("font-family", "sans-serif")
-    .attr("font-size", "28px")
+    .attr("font-size", "19px")
     .attr("fill", "#F0D000");
 
   svg.append("text")
-    .attr("x", 920)
-    .attr("y", 470)
+    .attr("x", width-190)
+    .attr("y", height/2-35)
     .style("stroke", "#000000")
     .style("fill", "black")
     .style("stroke-width", "1px")
     .text("Percent offgrid: " + d.offgrid+ "%")
     .attr("font-family", "sans-serif")
-    .attr("font-size", "28px")
+    .attr("font-size", "19px")
     .attr("fill", "#F0D000");
 
   var customer_density = (department[d.municipality].offgrid/100) * 
       department[d.municipality].pop / (department[d.municipality].area * 9001);
 
   svg.append("text")
-    .attr("x", 920)
-    .attr("y", 505)
+    .attr("x", width-190)
+    .attr("y", height/2-20)
     .style("stroke", "#000000")
     .style("fill", "black")
     .style("stroke-width", "1px")
     .text(Math.floor(customer_density) + " unelectrified homes per sq. km")
     .attr("font-family", "sans-serif")
-    .attr("font-size", "28px")
+    .attr("font-size", "19px")
     .attr("fill", "#F0D000");
 
   svg.selectAll("path")

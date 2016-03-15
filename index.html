@@ -354,8 +354,18 @@ d3.json("nica.json", function(error, nica) {
 )
 
 svg.append("text")
-  .attr("x", width-400)
+  .attr("x", width-450)
   .attr("y", height/2 - 80)
+  .style("stroke", "#000000")
+  .style("fill", "black")
+  .text("Can you guess why Colibrí's headquarters are in Matagalpa?")
+  .attr("font-family", "sans-serif")
+  .attr("font-size", "20px")
+  .attr("fill", "#F0D000");
+
+svg.append("text")
+  .attr("x", width-400)
+  .attr("y", height/2 - 120)
   .style("stroke", "#000000")
   .style("fill", "black")
   .text("Click on a municipality to learn more!")

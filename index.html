@@ -203,16 +203,16 @@ var department = {
 //bugfix for calculating active
 var prev = "Condega";
 
-var width = 1460, // was 1260
-    height = 900, // was 628
+var width = 800, // was 1260
+    height = 500, // was 628
     centered;
 
 var projection = d3.geo.conicConformal()
     .rotate([102, 0])
     .center([18.0, 13])
     .parallels([17.5, 29.5])
-    .scale(10000)
-    .translate([1260 / 2, height / 2]);
+    .scale(1000)
+    .translate([width / 2, height / 2]);
 
 var path = d3.geo.path()
     .projection(projection);
